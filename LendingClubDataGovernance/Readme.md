@@ -1,74 +1,78 @@
-## 📝 Data Quality & Governance Framework (Lending Club Case Study)
+# Data Quality and Governance Framework (Lending Club Case Study)
 
------
+## Context
 
-### **Context and Business Motivation**
+Regulatory reporting and credit risk models depend on a handful of fields in lending data. This project shows how a governance team gets from a raw dataset to rules that can be tested. I built a data dictionary, picked the critical data elements, wrote data quality rules for each one, and coded those rules in Python so each one returns a score.
 
-To establish and operationalise a Data Quality (DQ) framework to validate the fitness-for-use of lending data for regulatory reporting and credit risk modelling. The framework enforced business-critical rules that ensure financial integrity and data stability.
+**Scope:** 8 critical data elements, 22 scored data quality rules, run on the first 500,000 loans in the dataset.
 
-  * **Key Quantified Achievement:** Designed and implemented a Python/pandas-based framework that validated 7 core data quality dimensions (Accuracy, Completeness, Consistency, Integrity, Timeliness, Uniqueness and Validity) across 8 critical data elements (CDEs).
+## Contents
 
-### **Table of Contents**
+- [Dataset](#dataset)
+- [Tools and technologies](#tools-and-technologies)
+- [Project structure](#project-structure)
+- [Governance process](#governance-process)
+- [Results](#results)
+- [Proposed production architecture](#proposed-production-architecture)
+- [Future work](#future-work)
 
-  * [Context and Business Motivation](https://www.google.com/search?q=%23context-and-business-motivation)
-  * [Dataset](https://www.google.com/search?q=%23dataset)
-  * [Tools and Technologies](https://www.google.com/search?q=%23tools-and-technologies)
-  * [Project Structure](https://www.google.com/search?q=%23project-structure)
-  * [Data Governance process](https://www.google.com/search?q=%23data-governance-process)
-  * [Governance Findings](https://www.google.com/search?q=%23governance-findings)
-  * [Technical Implementation & Architecture](https://www.google.com/search?q=%23technical-implementation-%26-architecture)
-  * [Future Work](https://www.google.com/search?q=%23future-work)
+## Dataset
 
-### **Dataset**
+Lending Club accepted and rejected loans from 2007 to 2018, from Kaggle.
 
-This project utilizes the Lending Club data for both accepted and rejected loans from 2007 to 2018 from Kaggle.
+- Source: [Lending Club dataset on Kaggle](https://www.kaggle.com/datasets/wordsforthewise/lending-club)
+- The input CSV is not stored in this repository because of its size. Download the accepted loans file from Kaggle and save it as `Datasets/accepted_2007_to_2018Q4.csv` next to the notebook to run it.
 
-  * **Source:** [https://www.kaggle.com/datasets/wordsforthewise/lending-club](https://www.kaggle.com/datasets/wordsforthewise/lending-club) 
+## Tools and technologies
 
-### **Tools and Technologies**
+- **Python** with pandas and numpy for the data quality checks
+- **Google Sheets** for the data dictionary and rule definitions
+- **Canva** for the flowchart
 
-  * **Python**: The primary programming language used for the project.
-  * **Libraries**: pandas, numpy.
-  * **Design tools**: Canva (for flowcharts), Google Sheets (for data dictionary and rule definition).
+## Project structure
 
-### **Project Structure**
+| File | What it contains |
+| :--- | :--- |
+| `LendingClub Data Dictionary.xlsx` | Field metadata for 54 fields, critical data element selection and justification, and the data quality rules |
+| `LoanData_DataCleaningProject.ipynb` | The Python code that scores each data quality rule |
+| `AzureDataFlow.png` | A proposed cloud data flow. This is a design only and was not built |
 
-  * **`LendingClub Data Dictionary.xlsx`**: Includes metadata, CDE identification, and defined DQ rules.
-  * **`AzureDataFlow.png`**: Flowchart showing the progression of data into the Azure ecosystem. This is a hypothetical flowchart for an Azure-hosted environment.
-  * **`Input`**: This folder includes the input csv data file with the loans data.
-  * **`LoanData_DataCleaningProject.ipynb`**: The core Python code file for performing the CDE data quality checks.
-  * **`README.md`**.
+## Governance process
 
-### **Data Governance process**
+1. **Data dictionary.** Documented metadata for 54 fields.
+2. **Critical data element selection.** Picked 8 fields because they identify a loan or feed the target variables of credit risk models: `addr_state`, `grade`, `id`, `int_rate`, `loan_amnt`, `loan_status`, `term` and `total_rec_prncp`.
+3. **Rule definition.** Wrote business rules for each critical data element across seven dimensions: accuracy, completeness, consistency, integrity, timeliness, uniqueness and validity.
+4. **Operationalization.** Coded the testable rules in Python and scored each one as the share of records that pass.
 
-The data governance process addressed several key steps:
+Examples of the rules:
 
-  * **Data Dictionary**: Creating a unified document for the metadata of the 54 chosen elements.
-  * **CDE Identification**: Identifying critical data elements based on their use as identifiers or in credit risk model target variable calculation.
-  * **Business rule definition for CDEs**: Defining and documenting Data Quality business rules for the CDEs.
-  * **Operationalization of business rules**: Operationalizing the defined business rules using Python code.
+- **Integrity:** Principal received (`total_rec_prncp`) must not exceed the loan amount (`loan_amnt`).
+- **Accuracy:** The loan amount must be the same across the whole account history.
+- **Accuracy:** The month over month change in the grade mix must stay within 5%.
+- **Integrity:** A loan status cannot return to Current after Charged Off or Fully Paid.
 
-### **Governance Findings**
+## Results
 
-The framework enforced business-critical rules that ensure financial integrity and data stability.
+Every scored rule passed for more than 98.9% of records. The findings that matter:
 
-  * **Integrity Check:** Total Principal Received (`total_rec_prncp`) must not exceed the original Loan Amount (`loan_amnt`).
-  * **Consistency Check:** Loan Amount (`loan_amnt`) must be immutable across the entire account history (Uniqueness per ID).
-  * **Accuracy Check (Temporal):** Confirmed that month-over-month changes in loan grade distribution did not exceed the variance threshold.
-  * **Key Governance Finding:** Timeliness and real-time Accuracy rules were documented as non-operationalizable due to the snapshot nature of the data (lacking transactional history or modification date columns).
+- **Two records caused most failures.** The same 2 rows failed nearly every completeness and validity check, which points to 2 invalid rows rather than many separate problems. They should be removed during cleaning.
+- **Loan status integrity had the most failures.** 15 records broke the rule that a status cannot return to Current after Charged Off or Fully Paid.
+- **The lowest score was a grade accuracy check at 98.98%.** One monthly shift in the grade mix went past the 5% threshold.
+- **Two fields have the wrong data type.** `id` and `term` are stored as text and need converting to numbers.
+- **Some rules cannot be tested on this data.** Timeliness rules, real time accuracy rules and cross system consistency need transaction history, modification dates or a second system. This dataset is a snapshot, so I documented the logic for these rules without running them.
 
-### **Technical Implementation & Architecture**
+## Proposed production architecture
 
-The framework is designed for execution in a modern, scalable cloud environment.
+This design was not built. It shows how the checks would run at scale.
 
-| Component | Tool / Service | Role |
+| Component | Tool | Role |
 | :--- | :--- | :--- |
-| **Code Base** | Python, pandas | Implemented DQ rules using highly optimized, vectorized data frame operations. |
-| **Compute Engine** | Azure Databricks | Executes the Python script against large datasets stored in the Data Lake. |
-| **Data Flow** | ADLS -\> Azure Databricks -\> Azure SQL Database -\> Power BI | Demonstrates a scalable, modern cloud pipeline for DQ monitoring. |
-| **Output** | DQ Scorecard (pandas Dataframe) | Compiles all individual CDE scores into a single, structured table for reporting. |
+| Code | Python, pandas | Vectorized data quality rules |
+| Compute | Azure Databricks | Runs the script against data in the data lake |
+| Data flow | ADLS, Azure Databricks, Azure SQL Database, Power BI | Moves data from storage to a data quality monitoring report |
+| Output | Data quality scorecard | One table with the score for every rule |
 
-### **Future Work**
+## Future work
 
-  * Extend dataset to implement timeliness and accuracy checks completely for all the CDEs.
-  * Extend the code to perform generic DQ checks for other non-CDE elements.
+- Add the timeliness and accuracy checks once the dataset has the fields they need.
+- Run generic data quality checks on the non-critical fields, such as `issue_d` and `earliest_cr_line`, which are stored as text instead of dates.
