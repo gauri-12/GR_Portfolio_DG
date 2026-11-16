@@ -39,7 +39,7 @@ The relationship between the datasets is explored by joining them on 'state' and
 * Input Datasets: This folder includes all the files mentioned under Dataset.
  * gun_data.csv: FBI NICS data
  * US_Census_Data.csv: U.S. Census data
-* Investigate_a_Dataset.ipynb: Python code for cleaning, analysis, and visualization in HTML format.
+* Investigate_a_Dataset.html: The same analysis exported as an HTML page for easy viewing.
 * Investigate_a_Dataset.ipynb: Python code for cleaning, analysis, and visualization in Python notebook format.
 * README.md
 
@@ -83,7 +83,7 @@ This project applied key governance principles:
 
 ## **Future Work**
 
-* Advanced Data Sources: ntegrate state legislation, economic factors, or event datasets to investigate anomalies.
+* Advanced Data Sources: Integrate state legislation, economic factors, or event datasets to investigate anomalies.
 * Machine Learning: Build time series models to forecast future firearm background checks.
 * Data Governance: Catalog metadata in Collibra or Purview for improved lineage and compliance tracking.
 * Granular Analysis: Include county-level or city-level demographic data for more precise insights.
