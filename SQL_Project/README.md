@@ -1,191 +1,75 @@
-# **Brazilian Olist E-commerce Data Analysis (SQL and Python)**
+# Brazilian Olist E-commerce Analysis (SQL and Python)
 
-## **Context and Business Motivation**
-In today's competitive e-commerce landscape, understanding customer behavior, operational efficiency, and market trends is crucial for strategic growth. This project tackles a real-world business intelligence challenge: integrating and analyzing a comprehensive e-commerce dataset to derive actionable insights. By using SQL and Python, the project transforms raw, multi-source data into a structured and analyzable format.
+I loaded nine tables of Brazilian marketplace data into MySQL, checked and standardized them, built reporting views, and used SQL to answer ten business questions about sales, customers, delivery and sellers.
 
-For e-commerce businesses, having reliable, standardized data enables:
-- Customer-Centric Strategy: Identifying customer behavior patterns and repeat customers to improve customer lifetime value.
-- Operational Optimization: Analyzing shipping times and order statuses to enhance logistical efficiency and delivery performance.
-- Product and Market Insights: Understanding top-selling products and categories to inform inventory management and strategic pricing.
-- Revenue Growth: Pinpointing sales and payment trends to optimize revenue streams and business strategy.
+## Dataset
 
-Ultimately, this project highlights how effective data wrangling and analysis build the foundation for data-driven strategic planning and sustained business growth.
+The Olist public dataset on Kaggle covers 99,441 orders placed between September 2016 and October 2018 by 96,096 unique customers, across 32,951 products. It comes as nine CSV files.
 
-## **Table of Contents**
+- Source: [Olist Brazilian E-commerce dataset on Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
+- Table definitions, keys and data types: [OLIST_DataDictionary.xlsx](OLIST_DataDictionary.xlsx)
 
-- [Context and Business Motivation](#context-and-business-motivation)
-- [Dataset](#dataset)
-- [Tools and Technologies](#tools-and-technologies)
-- [Project Structure](#project-structure)
-- [Database Creation and Data Loading](#database-creation-and-data-loading)
-- [Data Cleaning and Transformation](#data-cleaning-and-transformation)
-- [SQL Queries and Analysis](#sql-queries-and-analysis)
-- [Key Findings and Conclusions](#key-findings-and-conclusions)
-- [Future Work](#future-work)
+## Tools
 
+- **MySQL** for the database, views and analysis queries
+- **Python** (pandas, SQLAlchemy, PyMySQL) to load the CSV files into MySQL
 
-## **Dataset**
+## What is in this folder
 
-The dataset used in this project is the Olist E-commerce Public Dataset, available on Kaggle. It contains information on 100,000 orders from 2016 to 2018 made at multiple marketplaces in Brazil. 
-The dataset is composed of several tables, including customer, order, product, and review data.
-[Data source](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
+| File or folder | What it does |
+| :--- | :--- |
+| `Dataset/` | The nine source CSV files |
+| `SQL_Import.ipynb` | Reads each CSV, checks the primary keys for duplicates, and loads the tables in foreign key order |
+| `Environment_Setup.sql` | Creates the `olist` database and tables, fixes load issues, backs up the tables, explores and standardizes the data, and builds three views |
+| `Business_Insights.sql` | The ten business questions and their queries |
+| `SQL Results/` | Query output for questions 3 to 10 as CSV files. Results for questions 1 and 2 are in comments inside `Business_Insights.sql` |
+| `OLIST_DataDictionary.xlsx` | Data dictionary for all nine tables |
 
-The details regarding the Table structures, datatypes, primary key and foreign keys, etc can be found in the [Data Dictionary](SQL_Project/OLIST_DataDictionary.xlsx)
+## How to run it
 
-## **Tools and Technologies**
+1. Run the first steps of `Environment_Setup.sql` to create the database and empty tables.
+2. Update the connection details in `SQL_Import.ipynb`, then run it to load the CSV files.
+3. Run the rest of `Environment_Setup.sql` to check the load, standardize the data and create the views.
+4. Run `Business_Insights.sql` to reproduce the results.
 
-* **Python:** Used for data loading, database connection, and potentially some initial data wrangling.
-    * Libraries: `pandas`, `sqlalchemy`, `os`
-* **SQL (MySQL):** For database creation, table definition, data manipulation, and complex querying.
-* **Jupyter Notebook/Python Scripts:** For executing Python code and documenting the process.
+## Data checks and cleaning
 
-## **Project Structure**
+- Row counts in MySQL matched the row counts in Python for every table.
+- Loading failed on repeated `customer_unique_id` values, which is expected for repeat customers, so I dropped the unique constraint on that column.
+- I backed up every table before changing anything.
+- I trimmed text fields, confirmed state codes were consistent, and checked review scores stayed between 1 and 5.
+- I added an English product category name, a delivery time in days, and a late delivery flag (delivered after the estimated date) to support the analysis.
+- I grouped the `boleto` and `voucher` payment types into one updated payment type column.
+- I created three views (`v_order_details`, `v_item_details`, `v_seller_performance`) so the analysis queries stay short.
 
-* Dataset: This folder includes all the files mentioned under Dataset. These 9 csv files form the input to the SQL tables.
-* SQL_results
-   * QxResult.csv: Where 'x' denotes a question number. These csv files store the results from the queries run for gathering insights.
-* Business_Insights.sql: SQL Scripts for data exploration and analysis to derive insights.
-* Environment_Setup.sql: SQL Scripts for setting the database schema, updating/ altering the datatypes and constraints and creation of views for ease of analysis.
-* OLIST_DataDictionary.xlsx: Data Dictionary outlining the various tables, structure, datatypes and the primary and foreign keys for each table.
-* SQL_Import.ipynb: Python script to load the data from CSV files into the SQL Database.
-* README.md
+## Business questions
 
-## **Database Creation and Data Loading**
+1. Overall business snapshot
+2. Overall performance
+3. Product portfolio performance, revenue versus satisfaction
+4. Monthly sales trend
+5. Top spenders
+6. Delivery timeliness
+7. Delivery challenges by region
+8. Seller performance
+9. Month over month trends
+10. Cumulative sales by product category
 
-This section details how the raw CSV data was loaded into the SQL database.
+The queries use common table expressions, window functions (`LAG`, `PERCENT_RANK`, running totals), views and multi-table joins.
 
-1.  **Create Database and Tables:**
-    * The `sql/create_tables.sql` script contains `CREATE TABLE` statements for all necessary tables, defining appropriate data types and primary/foreign keys.
-    * Run this script against your SQL database.
-    * *Self-correction/Alteration:* The `sql/alter_tables.sql` script includes `ALTER TABLE` or `UPDATE` statements used to modify table structures or data as needed (e.g., adding new columns, changing data types, handling missing values, or updating incorrect entries).
+## Key findings
 
-2.  **Upload Data using Python:**
-    * The `notebooks/1_data_loading_and_db_setup.ipynb` notebook demonstrates how to:
-        * Read each CSV file into a Pandas DataFrame.
-        * Establish a connection to the SQL database using SQLAlchemy.
-        * Upload each DataFrame to its corresponding table in the database using `df.to_sql()`.
+All amounts are in Brazilian reais.
 
+- **Scale:** The average order was worth about R$161, and the average delivery took about 12.5 days, with a longest delivery of 210 days.
+- **Revenue:** Health and beauty earned the most revenue (about R$1.44 million including freight), followed by watches and gifts and then bed, bath and table. Bed, bath and table sold the most items and orders.
+- **Top spenders:** The top 10% of customers by lifetime spend (9,611 customers) averaged 1.1 orders each and waited about 14 days for delivery. Repeat buying is rare in this dataset.
+- **Seasonality:** November 2017 was the peak month for both revenue and order count.
+- **Delivery:** About 93% of orders arrived on or before the estimated date, and about 6.6% arrived late.
+- **Regional gaps:** Late deliveries were most common in northeastern states, led by Alagoas (21.5% of orders), Maranhão (19.3%) and Sergipe (17.4%). Average freight in these states was between R$36 and R$38.
 
-## **Data Cleaning and Transformation**
+## Future work
 
-While much of the data cleaning was handled during the Python data loading phase (e.g., setting appropriate data types, handling nulls), some transformations were performed directly within the SQL database or as part of the initial Python processing:
-
-* **Data Type Conversions:** Ensuring columns like `order_purchase_timestamp` are stored as datetime objects.
-* **Handling Missing Values:** Strategies employed for missing values (e.g., imputation, deletion) in specific columns.
-* **Consistency Checks:** Ensuring consistency in categorical data (e.g., product categories, payment types).
-
-## **SQL Queries and Analysis**
-
-This section covers the various SQL queries performed to explore the dataset and answer specific business questions. The queries are organized in the `sql/complex_queries.sql` file and further explained in `notebooks/2_sql_analysis_and_queries.ipynb`.
-
-**Key Analytical Areas:**
-
-* **Customer Analysis:**
-    * Total number of unique customers.
-    * Geographic distribution of customers.
-    * Repeat customer behavior.
-* **Order Analysis:**
-    * Total orders over time (daily, monthly, yearly trends).
-    * Average order value.
-    * Most common payment methods.
-    * Order status distribution.
-* **Product Analysis:**
-    * Top-selling products and categories.
-    * Average product price per category.
-    * Products with the highest/lowest review scores.
-* **Seller Analysis:**
-    * Top performing sellers by revenue and number of sales.
-    * Seller distribution across states.
-* **Logistics Analysis:**
-    * Average shipping time.
-    * Delivery performance by state.
-    * Impact of freight value on customer reviews.
-* **Review Analysis:**
-    * Average review scores.
-    * Correlation between review scores and delivery time.
-    * Most common negative/positive review comments (if text data is analyzed).
-
-**Example Complex Queries (Illustrative, replace with your actual queries):**
-
-* **Query 1: Monthly Sales Trends and Average Order Value:**
-    ```sql
-    -- Example: Calculate monthly sales and average order value
-    SELECT
-        DATE_TRUNC('month', o.order_purchase_timestamp) AS sales_month,
-        COUNT(DISTINCT o.order_id) AS total_orders,
-        SUM(op.payment_value) AS total_revenue,
-        AVG(op.payment_value) AS average_order_value
-    FROM
-        orders o
-    JOIN
-        order_payments op ON o.order_id = op.order_id
-    GROUP BY
-        sales_month
-    ORDER BY
-        sales_month;
-    ```
-* **Query 2: Top 10 Product Categories by Revenue:**
-    ```sql
-    -- Example: Identify top 10 product categories by total revenue
-    SELECT
-        pct.product_category_name_english,
-        SUM(oi.price + oi.freight_value) AS total_category_revenue
-    FROM
-        order_items oi
-    JOIN
-        products p ON oi.product_id = p.product_id
-    JOIN
-        product_category_name_translation pct ON p.product_category_name = pct.product_category_name
-    GROUP BY
-        pct.product_category_name_english
-    ORDER BY
-        total_category_revenue DESC
-    LIMIT 10;
-    ```
-* **Query 3: Customer Lifetime Value (CLV) approximation:**
-    ```sql
-    -- Example: Calculate a basic CLV for customers
-    SELECT
-        c.customer_unique_id,
-        COUNT(DISTINCT o.order_id) AS total_orders,
-        SUM(op.payment_value) AS total_spent
-    FROM
-        customers c
-    JOIN
-        orders o ON c.customer_id = o.customer_id
-    JOIN
-        order_payments op ON o.order_id = op.order_id
-    GROUP BY
-        c.customer_unique_id
-    ORDER BY
-        total_spent DESC;
-    ```
-
-**Views for Easy Data Analysis:**
-
-The `sql/create_views.sql` script defines several SQL views to simplify complex queries and provide pre-aggregated or joined datasets for easier analysis. Examples include:
-
-* `v_orders_with_customer_info`: Joins order and customer details.
-* `v_order_product_details`: Combines order, item, and product information.
-* `v_monthly_sales_summary`: Pre-calculates monthly sales metrics.
-
-
-## **Key Findings and Conclusions**
-
-Based on the exploration and analysis, here are some key conclusions:
-
-* **Payment Type Distribution:** Credit card (cartao de credito) is by far the most popular payment method.
-* **Customer Location Focus:** The majority of customers are concentrated in Southeast Brazil.
-* **Product Performance:** "**Bed_bath_table**" is the best-performing category in terms of sales, while "**computers_accessories**" has the highest average review score.
-* **Seller Insights:** There's a significant disparity in seller performance, with a small percentage of sellers accounting for a large portion of sales.
-* **Review Score Impact:** Review scores appear to be influenced by delivery time and product quality.
-* **Order Trends:** There's a clear seasonality in orders, with peaks during certain months.
-* **Logistics Efficiency:** Delivery times vary significantly by region and freight cost.
-
-## **Future Work**
-
-* **Advanced SQL Techniques:** Explore window functions, common table expressions (CTEs), and recursive queries for deeper insights.
-* **Data Visualization:** Integrate with tools like Tableau, Power BI, or Python libraries (Matplotlib, Seaborn) to visualize the findings.
-* **Machine Learning:** Develop predictive models (e.g., for customer churn, product recommendations, delivery time prediction).
-* **Performance Optimization:** Optimize queries and database schema for better performance with larger datasets.
-* **ETL Pipeline:** Automate the data extraction, transformation, and loading process using tools like Apache Airflow.
+- Visualize the findings in a Tableau or Power BI dashboard.
+- Test whether freight cost explains the regional delivery gaps.
+- Automate the load and refresh of the tables.
