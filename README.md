@@ -1,30 +1,31 @@
 # Gauri Rajgopal | Data & AI Governance
 
-I help regulated organizations govern the data, vendors and AI their decisions depend on. I have 5+ years in financial services, building data governance and data quality frameworks for banks. I bring the same discipline to AI governance, turning regulatory requirements into clear standards and defined ownership.
+This portfolio shows data and AI governance in practice. The Lending Club project defines critical data elements, writes quality rules across seven dimensions and scores them in Python on 500,000 loans. The job alert pipeline shows AI automation running with a person making every final decision.
 
-## What I Bring
+## About me
 
-### Governance frameworks for banks
-I authored a data governance framework aligned with BCBS 239, including the policy, standards, guidelines and RACI matrix, and tracked identified gaps to closure for a 20% increase in compliance.
+My work sits where regulation meets everyday data practice. With 5+ years in financial services, I turn requirements such as BCBS 239 and OSFI B-10 into definitions, standards and named owners that teams can follow, and then test data quality against them. SQL and Python let me check the data directly, and I now apply the same approach to AI governance.
 
-### Third-party risk
-I assessed a bank's third-party risk processes against OSFI B-10, rated 48 critical gaps by severity, and delivered a remediation roadmap.
+## Expertise
 
-### Data quality
-I defined the critical data elements, built the Python data quality assessment and logged the issues for 15 years of loan data, including the data that fed credit risk models.
-
-### AI in practice
-I build AI-enabled workflows and write about how to govern them. My article [Governing the Future of AI](https://gaurirajgopal.medium.com/governing-the-future-of-ai-deconstructing-the-new-challenges-bf721cc92f51) looks at the new risks AI brings to organizations.
+- **Data quality frameworks**  
+  Trusted data starts with knowing which data matters, so I define the critical data elements, write rules across seven dimensions and score them in Python, as in the Lending Club project.
+- **Regulatory standards for banks**  
+  I turn BCBS 239 and OSFI B-10 requirements into policies, standards and clear ownership, so teams know what is expected and who is accountable.
+- **Third-party and model data risk**  
+  I assess vendors and the data behind credit risk models against regulatory expectations, so gaps are rated by severity and come with a remediation roadmap. The [EY Canada paper on model data controls](#publications), which I co-authored, covers the data side.
+- **AI governance**  
+  Keeping a person accountable for every final decision makes AI easier to trust, so I design AI workflows that way, as in the job alert pipeline. My Medium article [Governing the Future of AI](https://gaurirajgopal.medium.com/governing-the-future-of-ai-deconstructing-the-new-challenges-bf721cc92f51) covers the new risks AI brings to organizations.
 
 ## Featured Projects
 
 ### Data Quality & Governance Framework
-Built a Python framework that runs a 7-point data quality check (accuracy, completeness, consistency, integrity, timeliness, uniqueness and validity) on Lending Club loan data. It shows how data quality problems surface as credit risk problems.
+Defined data quality rules for 8 critical data elements across seven dimensions and scored 22 of them in Python on 500,000 Lending Club loans. Rules that need live data, such as timeliness, are documented but not run.
 
 Tools: Python, Google Sheets, Canva. [View the project](LendingClubDataGovernance)
 
 ### Job Alert Automation Pipeline
-Reads LinkedIn job alert emails, filters them by keyword, scores each role against a resume with an LLM, logs the matches to Google Sheets and emails a daily digest. It runs nightly on GitHub Actions. I built it with AI assistance and designed it so that a person makes every final decision.
+Reads LinkedIn job alert emails, filters them by keyword, scores each role against a resume with an LLM, logs the matches to Google Sheets and emails a daily digest. It runs nightly on GitHub Actions and was built with AI assistance, with a person making every final decision.
 
 Tools: Python, Gmail API, Groq LLM, GitHub Actions. [View the repository](https://github.com/gauri-12/job_alert_pipeline_clean)
 
@@ -49,5 +50,7 @@ Tools: Python, Gmail API, Groq LLM, GitHub Actions. [View the repository](https:
 ## Connect
 
 LinkedIn: https://www.linkedin.com/in/gauri-rajgopal/
+
+Location: San Francisco Bay Area, CA
 
 Email: gbr.rajgopal@gmail.com
