@@ -76,21 +76,27 @@ group by Order_YM;
 What is the average order count and average delivery days for customers in this high-value segment?
 */
 
+/* Note: customer_id is created per order in this dataset, so lifetime spending is grouped by customer_unique_id.
+percent_rank() is ordered by spending in descending order, so the top 10% of customers have a rank of 0.1 or lower. */
 with cte_customer_details as (
-	select customer_id, sum(payment_total) as total_cust_spending, count(order_id) as customer_order_count, avg(delivery_days) as avg_cust_deldays
+	select customer_unique_id, sum(payment_total) as total_cust_spending, count(order_id) as customer_order_count, avg(delivery_days) as avg_cust_deldays
     from v_order_details
     where payment_total is not null
-    group by customer_id
+    group by customer_unique_id
 ),
 
 cte_percent_rank as(
-	select customer_id,total_cust_spending,customer_order_count, avg_cust_deldays, percent_rank() over (order by total_cust_spending desc) as cust_percentage
+	select customer_unique_id,total_cust_spending,customer_order_count, avg_cust_deldays, percent_rank() over (order by total_cust_spending desc) as cust_percentage
 	from cte_customer_details)
 
 
-select count(distinct rk.customer_id) as total_customers, avg(customer_order_count) as avg_order_count ,avg(avg_cust_deldays) as avg_delivery_days
+select count(distinct rk.customer_unique_id) as total_customers, avg(customer_order_count) as avg_order_count ,avg(avg_cust_deldays) as avg_delivery_days
 from cte_percent_rank rk
-where cust_percentage >= 0.9;
+where cust_percentage <= 0.1;
+
+/*# total_customers, avg_order_count, avg_delivery_days
+'9611', '1.1213', '14.0736'
+*/
 
 
 /* -------------------------------------- QUESTION 6 : DELIVERY TIMELINESS --------------------------------------*/
